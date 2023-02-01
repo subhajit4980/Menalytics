@@ -26,48 +26,49 @@ def create_app():
     print("DB Initialized Sucessfully")
     CORS(app)
     with app.app_context():
-        #  customer signup part
-        @app.route('/customer_signup', methods=['POST'])
-        def customer_signup():
+        #  restaurant signup part
+        @app.route("/restaurants_signup",methods=['POST'])
+        def restaurants_signup():
             data = request.form.to_dict(flat=True)
             print(data)
-            new_customer = Customer(
-                username=data["username"],
-                password=data['password'],
-                name=data['name'],
-                email=data['email'],
-                phone=data['phone'],
-                address=data['address']
+            new_restaurant = Restaurant(
+                username = data['username'],
+                password = data['password'],
+                name = data['name'],
+                phone_number = data['phone_number'],
+                email = data['email'],
+                address = data['address'],
             )
             try:
-                users=Customer.query.all()
-                usernamelist=[user.username for user in users]
-                if new_customer.username  not in usernamelist:
-                    db.session.add(new_customer)
+                restaurants=Restaurant.query.all()
+                usernamelist=[restaurant.username for restaurant in restaurants]
+                if new_restaurant.username not in usernamelist:
+                    db.session.add(new_restaurant)
                     db.session.commit()
+                    # return jsonify(msg="username already in used, kindly try again!!")
                 else:
-                    return jsonify("username already in used")
+                    return jsonify("username already in used, kindly try again!!")
             except:
-                return jsonify("some thing went wrong")
+                return jsonify("SOMETHING WENT WRONG!!") 
             return jsonify(msg="Signup Successfully")
-# customer signin part
-        @app.route("/customer_signin", methods=['POST'])
-        def customer_signin():
+#restaurant signin
+        @app.route("/restaurants_signin", methods=["POST"])
+        def restaurants_signin():
             if request.method=="POST":
-                    c_username=request.form['username']
-                    c_password=request.form['password']
-                    users=Customer.query.all()
-                    for user in users:
-                        if user.username==c_username and user.password==c_password :
-                            user_idx=user.id
-                            response={
-                                "massage":"Login successful",
-                                "user_id": user_idx
-                            }
-                            return response
-                        else:
-                            continue
-            return "user doesn't exists"
+                c_username=request.form['username']
+                c_password=request.form['password']
+                users=Restaurant.query.all()
+                for restaurant in users:
+                    if restaurant.username==c_username and restaurant.password==c_password :
+                        user_idx=restaurant.id
+                        response={
+                            "massage":"Login successful",
+                            "user_id": user_idx
+                        }
+                        return response
+                    else:
+                        continue
+                return jsonify(msg="Unvalid username or password. Please try again!!")
 
 # choose_dishes_place_order
         @app.route("/choose_dishes_place_order", methods=["GET", "POST"])
