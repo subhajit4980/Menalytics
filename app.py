@@ -10,6 +10,8 @@ from model.customer import Customer
 from model.add_items import Add_items
 from model.customer_ordered_record import Customer_ordered_record
 from model.get_customer_ordered_dishes import Get_customer_ordered_dishes
+from model.restaurant import Restaurant
+
 
 load_dotenv(path.join(getcwd(),'.env'))
 
@@ -65,6 +67,7 @@ def create_app():
                         else:
                             continue
             return "user doesn't exists"
+
 # choose_dishes_place_order
         @app.route("/choose_dishes_place_order", methods=["GET", "POST"])
         def choose_dishes_place_order():
@@ -151,7 +154,6 @@ def create_app():
                     db.session.commit()
                     return jsonify(f"{order.item_name} delivered to {order.customer_name} successfully !")
             return jsonify("no delivery pending")
-       
         db.create_all()
         db.session.commit()
         return app
