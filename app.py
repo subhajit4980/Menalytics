@@ -11,6 +11,7 @@ from model.add_items import Add_items
 from model.customer_ordered_record import Customer_ordered_record
 from model.get_customer_ordered_dishes import Get_customer_ordered_dishes
 from model.restaurant import Restaurant
+from model.rating_feedback import Rating_feedback
 
 
 load_dotenv(path.join(getcwd(),'.env'))
@@ -150,6 +151,56 @@ def create_app():
                     db.session.commit()
                     return jsonify(f"{order.item_name} delivered to {order.customer_name} successfully !")
             return jsonify("no delivery pending")
+        @app.route('/choose_restaurant', methods=['POST'])
+        def choose_restaurant():
+            restaurant_name = request.form["restaurant_name"]
+
+            #* taking the restarant details
+            restaurant_data = Add_items.query.all()
+            
+            #* to show the dishes
+            restaurant_items = {
+                "Restaurant name": restaurant_name
+            }
+            list_items = []
+            for i in restaurant_data:
+                if(restaurant_name == i.restaurant_name):
+                    list_items.append(i.item_name)
+                    rating_feedback_data = Rating_feedback.query.all()
+                    list_dishes = []
+                    for item in list_items:
+                        rating = 0
+                        count = 0
+                        for feedback in rating_feedback_data:
+                            if(item == feedback.item_name):
+                                rating += feedback.item_rating
+                                count += 1
+                        data = {
+                            "Item name": item,
+                            "Quantity": Add_items.query.filter_by(item_name=item).first().quantity,
+                            "Item rating": rating/count if count > 0 else "Not rated yet",
+                            "No of reviews": count
+                        }
+                        list_dishes.append(data)
+                        restaurant_items["The Dishes"] = list_dishes
+                else:
+                    continue
+            return jsonify(f"Sorry, {restaurant_name} is not available." if len(restaurant_items)==1 else restaurant_items )
+        
+        @app.route('/give_rating_feedback', methods=['POST'])
+        def give_rating_feedback():
+            rating_feedback_data = request.get_json()
+            new_rating_feedback = Rating_feedback(
+                restaurant_name = rating_feedback_data["restaurant name"],
+                customer_name = rating_feedback_data["customer name"],
+                item_name = rating_feedback_data["item name"],
+                item_rating = rating_feedback_data["item rating"],
+                item_feedback = rating_feedback_data["item feedback"]
+            )
+            db.session.add(new_rating_feedback)
+            db.session.commit()
+            print(rating_feedback_data)
+            return jsonify(msg="Thanks for your feedback")
         db.create_all()
         db.session.commit()
         return app
