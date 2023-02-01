@@ -26,6 +26,48 @@ def create_app():
     print("DB Initialized Sucessfully")
     CORS(app)
     with app.app_context():
+        #  customer signup part
+        @app.route('/customer_signup', methods=['POST'])
+        def customer_signup():
+            data = request.form.to_dict(flat=True)
+            print(data)
+            new_customer = Customer(
+                username=data["username"],
+                password=data['password'],
+                name=data['name'],
+                email=data['email'],
+                phone=data['phone'],
+                address=data['address']
+            )
+            try:
+                users=Customer.query.all()
+                usernamelist=[user.username for user in users]
+                if new_customer.username  not in usernamelist:
+                    db.session.add(new_customer)
+                    db.session.commit()
+                else:
+                    return jsonify("username already in used")
+            except:
+                return jsonify("some thing went wrong")
+            return jsonify(msg="Signup Successfully")
+# customer signin part
+        @app.route("/customer_signin", methods=['POST'])
+        def customer_signin():
+            if request.method=="POST":
+                    c_username=request.form['username']
+                    c_password=request.form['password']
+                    users=Customer.query.all()
+                    for user in users:
+                        if user.username==c_username and user.password==c_password :
+                            user_idx=user.id
+                            response={
+                                "massage":"Login successful",
+                                "user_id": user_idx
+                            }
+                            return response
+                        else:
+                            continue
+            return "user doesn't exists"
         #  restaurant signup part
         @app.route("/restaurants_signup",methods=['POST'])
         def restaurants_signup():
