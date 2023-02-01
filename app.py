@@ -42,7 +42,23 @@ def create_app():
                 return jsonify("some thing went wrong")
             return jsonify(msg="Signup Successfully")
 # customer signin part
-        
+        @app.route("/customer_signin", methods=['POST'])
+        def customer_signin():
+            if request.method=="POST":
+                    c_username=request.form['username']
+                    c_password=request.form['password']
+                    users=Customer.query.all()
+                    for user in users:
+                        if user.username==c_username and user.password==c_password :
+                            user_idx=user.id
+                            response={
+                                "massage":"Login successful",
+                                "user_id": user_idx
+                            }
+                            return response
+                        else:
+                            continue
+            return "user doesn't exists"
 
         db.create_all()
         db.session.commit()
