@@ -7,9 +7,9 @@ from datetime import datetime,date
 import pytz
 from sqlalchemy.orm import sessionmaker
 from model.customer import Customer
-# from model.add_items import Add_items
-# from model.customer_ordered_record import Customer_ordered_record
-# from model.get_customer_ordered_dishes import Get_customer_ordered_dishes
+from model.add_items import Add_items
+from model.customer_ordered_record import Customer_ordered_record
+from model.get_customer_ordered_dishes import Get_customer_ordered_dishes
 
 load_dotenv(path.join(getcwd(),'.env'))
 
@@ -65,6 +65,64 @@ def create_app():
                         else:
                             continue
             return "user doesn't exists"
+# choose_dishes_place_order
+        @app.route("/choose_dishes_place_order", methods=["GET", "POST"])
+        def choose_dishes_place_order():
+            username = request.args.get('username')
+            customers = Customer.query.filter_by(username=username).first()
+            if customers is not None:
+                # customer_name=customers.name
+                order_rec = request.get_json()
+                # print(order_rec)
+                for data in order_rec["data"]:
+                    record = Customer_ordered_record(
+
+                        restaurant_name=data['restaurant_name'],
+                        dish_name=data['dish_name'],
+                        quantity=data['quantity'],
+                        price=0,
+                        Total_price=0,
+                        purchased_date=str(datetime.now(pytz.timezone("Asia/Kolkata"))),
+                        delivery_address=data["delivery_address"],
+                        customer_username=customers.username
+                    )
+                    # print(record.restaurant_name)
+                    restaurant_data = Add_items.query.filter_by(restaurant_name=record.restaurant_name).first()  
+                    dish=Add_items.query.filter_by(item_name=record.dish_name).first()
+                    if dish is not None and restaurant_data is not None:
+                        record.price=dish.price
+                        record.Total_price=record.price * record.quantity
+                        if  record.restaurant_name == restaurant_data.restaurant_name:
+                            if record.quantity <= restaurant_data.quantity and record.dish_name ==restaurant_data.item_name:
+                                dish.quantity-=record.quantity
+                                if dish.quantity==0:
+                                    db.session.delete(dish)
+                                    db.session.commit()
+                                else:
+                                    db.session.add(dish)
+                                db.session.add(record)
+                            else:
+                                return jsonify(f"{record.dish_name} not available or this quantity is not available")
+                        else:
+                            return jsonify("Wrong restaurant Name: ", record.restaurant_name)
+                        
+                        order=Get_customer_ordered_dishes(
+                            restaurant_name=record.restaurant_name,
+                            customer_name=customers.name,
+                            item_name=record.dish_name,
+                            quantity=record.quantity,
+                            address=customers.address,
+                            phone=customers.phone,
+                            order_time=str(datetime.now(pytz.timezone("Asia/Kolkata")))
+                        )
+                        db.session.add(order)
+                    else:
+                        return jsonify("dish or restaurant choosen wrong !!!!")
+                db.session.commit()
+                return jsonify("Order successful. Payment should be done in cash to the delivery partner")    
+            else:
+                return jsonify("user is not authorized")
+
 
         db.create_all()
         db.session.commit()
