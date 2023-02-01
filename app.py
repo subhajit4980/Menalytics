@@ -56,9 +56,27 @@ def create_app():
                         restaurant_items["The Dishes"] = list_dishes
                 else:
                     continue
-
             return jsonify(f"Sorry, {restaurant_name} is not available." if len(restaurant_items)==1 else restaurant_items )
-        J
+        
+        @app.route('/give_rating_feedback', methods=['POST'])
+        def give_rating_feedback():
+            rating_feedback_data = request.get_json()
+            new_rating_feedback = Rating_feedback(
+                restaurant_name = rating_feedback_data["restaurant name"],
+                customer_name = rating_feedback_data["customer name"],
+                item_name = rating_feedback_data["item name"],
+                item_rating = rating_feedback_data["item rating"],
+                item_feedback = rating_feedback_data["item feedback"]
+            )
+            db.session.add(new_rating_feedback)
+            db.session.commit()
+            print(rating_feedback_data)
+            return jsonify(msg="Thanks for your feedback")
+
+        db.create_all()
+        db.session.commit()
+        return app
+
 if __name__ == "__main__":
     app=create_app()
     app.run(host='0.0.0.0',port=4545,debug=True)
