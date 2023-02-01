@@ -46,11 +46,11 @@ def create_app():
         @app.route("/restaurants_signin", methods=["POST"])
         def restaurants_signin():
             if request.method=="POST":
-                c_username=request.form['username']
-                c_password=request.form['password']
+                r_username=request.form['username']
+                r_password=request.form['password']
                 users=Restaurant.query.all()
                 for restaurant in users:
-                    if restaurant.username==c_username and restaurant.password==c_password :
+                    if restaurant.username==r_username and restaurant.password==r_password :
                         user_idx=restaurant.id
                         response={
                             "massage":"Login successful",
