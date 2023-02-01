@@ -123,7 +123,35 @@ def create_app():
             else:
                 return jsonify("user is not authorized")
 
-
+        @app.route("/check_order_history",methods=["GET", "POST"])
+        def check_order_history():
+            customer_username = request.form["username"]
+            customer_order=Customer_ordered_record.query.all()
+            order_list={}
+            for order in customer_order:
+                if order.customer_username ==customer_username:
+                    customer={}
+                    customer["restaurant_name"]=order.restaurant_name
+                    customer["dish_name"]=order.dish_name
+                    customer["quantity"]=order.quantity
+                    customer["price"]=order.price
+                    customer["Total_price"]=order.Total_price
+                    customer["delivery_address"]=order.delivery_address
+                    order_list[order.purchased_date]=customer
+            return jsonify("you didn't order anything" if len(order_list)==0 else order_list)
+    
+        @app.route("/delivery_order", methods=["GET", "POST"])
+        def delivery_order():
+            restaurant_name=request.form["restaurant_name"]
+            customer_order=Get_customer_ordered_dishes.query.all()
+            # order_list={}
+            for order in customer_order:
+                if order.restaurant_name==restaurant_name:
+                    db.session.delete(order)
+                    db.session.commit()
+                    return jsonify(f"{order.item_name} delivered to {order.customer_name} successfully !")
+            return jsonify("no delivery pending")
+       
         db.create_all()
         db.session.commit()
         return app
