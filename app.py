@@ -74,9 +74,7 @@ def create_app():
             username = request.args.get('username')
             customers = Customer.query.filter_by(username=username).first()
             if customers is not None:
-                # customer_name=customers.name
                 order_rec = request.get_json()
-                # print(order_rec)
                 for data in order_rec["data"]:
                     record = Customer_ordered_record(
 
@@ -89,7 +87,6 @@ def create_app():
                         delivery_address=data["delivery_address"],
                         customer_username=customers.username
                     )
-                    # print(record.restaurant_name)
                     restaurant_data = Add_items.query.filter_by(restaurant_name=record.restaurant_name).first()  
                     dish=Add_items.query.filter_by(item_name=record.dish_name).first()
                     if dish is not None and restaurant_data is not None:
@@ -147,7 +144,6 @@ def create_app():
         def delivery_order():
             restaurant_name=request.form["restaurant_name"]
             customer_order=Get_customer_ordered_dishes.query.all()
-            # order_list={}
             for order in customer_order:
                 if order.restaurant_name==restaurant_name:
                     db.session.delete(order)
