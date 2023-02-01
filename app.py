@@ -114,7 +114,7 @@ def create_app():
                         continue
                 return jsonify(msg="Unvalid username or password. Please try again!!")
 
-# choose_dishes_place_order
+# #choose_dishes_place_order
         @app.route("/choose_dishes_place_order", methods=["GET", "POST"])
         def choose_dishes_place_order():
             username = request.args.get('username')
