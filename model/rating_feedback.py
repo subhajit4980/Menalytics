@@ -8,3 +8,4 @@ class Rating_feedback(db.Model):
     item_name = db.Column(db.String(200), nullable=False)
     item_rating = db.Column(db.Float, nullable=False)
     item_feedback = db.Column(db.String(300),nullable=False)
+    
