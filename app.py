@@ -13,13 +13,10 @@ from model.get_customer_ordered_dishes import Get_customer_ordered_dishes
 from model.restaurant import Restaurant
 from model.rating_feedback import Rating_feedback
 
-
 load_dotenv(path.join(getcwd(),'.env'))
 
 def create_app():
-
     app=Flask(__name__)
-
     app.config["SQLALCHEMY_DATABASE_URI"]=environ.get('DB_URI')
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SQLALCHEMY_ECHO"] = False
@@ -52,7 +49,8 @@ def create_app():
             except:
                 return jsonify("some thing went wrong")
             return jsonify(msg="Signup Successfully")
-# customer signin part
+
+    # customer signin part
         @app.route("/customer_signin", methods=['POST'])
         def customer_signin():
             if request.method=="POST":
@@ -70,7 +68,8 @@ def create_app():
                         else:
                             continue
             return "user doesn't exists"
-        #  restaurant signup part
+      
+    #  restaurant signup part
         @app.route("/restaurants_signup",methods=['POST'])
         def restaurants_signup():
             data = request.form.to_dict(flat=True)
@@ -95,7 +94,8 @@ def create_app():
             except:
                 return jsonify("SOMETHING WENT WRONG!!") 
             return jsonify(msg="Signup Successfully")
-#restaurant signin
+
+    # restaurant signin
         @app.route("/restaurants_signin", methods=["POST"])
         def restaurants_signin():
             if request.method=="POST":
@@ -114,7 +114,7 @@ def create_app():
                         continue
                 return jsonify(msg="Unvalid username or password. Please try again!!")
 
-# #choose_dishes_place_order
+# choose_dishes_place_order
         @app.route("/choose_dishes_place_order", methods=["GET", "POST"])
         def choose_dishes_place_order():
             username = request.args.get('username')
@@ -200,10 +200,10 @@ def create_app():
         def choose_restaurant():
             restaurant_name = request.form["restaurant_name"]
 
-            #* taking the restarant details
+        #* taking the restarant details
             restaurant_data = Add_items.query.all()
             
-            #* to show the dishes
+        #* to show the dishes
             restaurant_items = {
                 "Restaurant name": restaurant_name
             }
@@ -246,6 +246,7 @@ def create_app():
             db.session.commit()
             print(rating_feedback_data)
             return jsonify(msg="Thanks for your feedback")
+        
         @app.route('/add_items_details', methods=['POST'])
         def add_items():
             username = request.args.get('username')
